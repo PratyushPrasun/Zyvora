@@ -1,6 +1,7 @@
 import Product from "../models/product.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadImage, deleteImage } from "../utils/cloudinaryHelper.js";
+import { deleteCache, getCache, setCache } from "../services/cacheServices.js";
 
 // @desc Get All Products
 // @route GET /api/products
@@ -61,12 +62,22 @@ export const getProducts = asyncHandler(async (req, res) => {
             sort.createdAt = -1;
     }
 
+    const cacheKey = "products";
+
+    const cachedProducts = await getCache(cacheKey);
+
+    if (cachedProducts) {
+        return res.json(cachedProducts);
+    }   
+
     const totalProducts = await Product.countDocuments(query);
 
     const products = await Product.find(query)
         .sort(sort)
         .skip(skip)
         .limit(limit);
+
+     await setCache(cacheKey, products, 300);
 
     res.status(200).json({
         success: true,
@@ -76,6 +87,8 @@ export const getProducts = asyncHandler(async (req, res) => {
         count: products.length,
         products,
     });
+
+    await deleteCache("products");
 
 });
 
