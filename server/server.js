@@ -24,10 +24,14 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 
 import errorMiddleware from "./middleware/errorMiddleware.js";
 
+import { connectRedis } from "./config/redis.js";
+import { apiLimiter } from "./middleware/rateLimiter.js";
+
 const app = express();
 
 // Connect Database
 connectDB();
+connectRedis();
 
 // Middlewares
 app.use(cors());
@@ -56,6 +60,7 @@ app.use("/api/payments", paymentRoutes);
 // Global Error Handler
 app.use(errorMiddleware);
 
+app.use(apiLimiter);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
