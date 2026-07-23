@@ -2,6 +2,7 @@ import Product from "../models/product.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadImage, deleteImage } from "../utils/cloudinaryHelper.js";
 import { deleteCache, getCache, setCache } from "../services/cacheServices.js";
+import { logAdminAction } from "../services/auditService.js";
 
 // @desc Get All Products
 // @route GET /api/products
@@ -68,7 +69,7 @@ export const getProducts = asyncHandler(async (req, res) => {
 
     if (cachedProducts) {
         return res.json(cachedProducts);
-    }   
+    }
 
     const totalProducts = await Product.countDocuments(query);
 
@@ -77,7 +78,7 @@ export const getProducts = asyncHandler(async (req, res) => {
         .skip(skip)
         .limit(limit);
 
-     await setCache(cacheKey, products, 300);
+    await setCache(cacheKey, products, 300);
 
     res.status(200).json({
         success: true,
@@ -120,97 +121,6 @@ export const getProductById = asyncHandler(async (req, res) => {
 
 export const addProduct = asyncHandler(async (req, res) => {
 
-  const {
-    title,
-    description,
-    price,
-    stock,
-    category,
-    brand,
-  } = req.body;
-
-  // Validation
-  if (!title || !description || !price || !category) {
-    return res.status(400).json({
-      success: false,
-      message: "Title, description, price and category are required.",
-    });
-  }
-
-  const existingProduct = await Product.findOne({ title });
-
-  if (existingProduct) {
-  return res.status(409).json({
-    success: false,
-    message: "A product with this title already exists.",
-  });
-}
-
-    const uploadedImages = [];
-
-try {
-
-    for (let i = 0; i < req.files.length; i++) {
-
-        const result = await uploadImage(
-
-            req.files[i].buffer,
-
-            "ecommerce/products"
-
-        );
-
-        uploadedImages.push({
-
-            url: result.secure_url,
-
-            public_id: result.public_id,
-
-            isPrimary: i === 0
-
-        });
-
-    }
-
-} catch (error) {
-
-    // Cleanup already uploaded images
-
-    for (const image of uploadedImages) {
-
-        await deleteImage(image.public_id);
-
-    }
-
-    throw error;
-
-}
-  // Create Product
-  const product = await Product.create({
-    title,
-    description,
-    price,
-    stock: stock || 0,
-    category,
-    brand: brand || "",
-    images: uploadedImages,
-  });
-
-  res.status(201).json({
-    success: true,
-    message: "Product added successfully.",
-    product,
-  });
-
-
-});
-
-// @desc Update Product
-// @route PUT /api/products/:id
-// @access Private/Admin
-
-export const updateProduct = asyncHandler(async (req, res) => {
-
     const {
         title,
         description,
@@ -218,62 +128,241 @@ export const updateProduct = asyncHandler(async (req, res) => {
         stock,
         category,
         brand,
-        isActive
     } = req.body;
 
-    // Find Product
+    // Validation
+    if (!title || !description || !price || !category) {
+        return res.status(400).json({
+            success: false,
+            message: "Title, description, price and category are required.",
+        });
+    }
+
+    const existingProduct = await Product.findOne({ title });
+
+    if (existingProduct) {
+        return res.status(409).json({
+            success: false,
+            message: "A product with this title already exists.",
+        });
+    }
+
+    const uploadedImages = [];
+
+    try {
+
+        for (let i = 0; i < req.files.length; i++) {
+
+            const result = await uploadImage(
+
+                req.files[i].buffer,
+
+                "ecommerce/products"
+
+            );
+
+            uploadedImages.push({
+
+                url: result.secure_url,
+
+                public_id: result.public_id,
+
+                isPrimary: i === 0
+
+            });
+
+        }
+
+    } catch (error) {
+
+        // Cleanup already uploaded images
+
+        for (const image of uploadedImages) {
+
+            await deleteImage(image.public_id);
+
+        }
+
+        throw error;
+
+    }
+    // Create Product
+    const product = await Product.create({
+        title,
+        description,
+        price,
+        stock: stock || 0,
+        category,
+        brand: brand || "",
+        images: uploadedImages,
+    });
+
+    await logAdminAction({
+        req,
+        admin: req.user._id,
+        action: "CREATE",
+        entityType: "Product",
+        entityId: product._id,
+        changes: {
+            created: true,
+        },
+    });
+
+    res.status(201).json({
+        success: true,
+        message: "Product added successfully.",
+        product,
+    });
+
+
+});
+
+const getChanges = (original, updates) => {
+  const changes = {};
+  Object.keys(updates).forEach((key) => {
+    if (updates[key] !== undefined && updates[key] !== original[key]) {
+      changes[key] = {
+        from: original[key],
+        to: updates[key],
+      };
+    }
+  });
+  return changes;
+};
+
+// @desc Update Product
+// @route PUT /api/products/:id
+// @access Private/Admin
+
+export const updateProduct = asyncHandler(async (req, res) => {
+    const {
+        title,
+        description,
+        price,
+        stock,
+        category,
+        brand,
+        isActive,
+        __v
+    } = req.body;
+
     const product = await Product.findById(req.params.id);
 
     if (!product) {
         return res.status(404).json({
             success: false,
-            message: "Product not found",
+            message: "Product not found.",
         });
     }
 
-    // Only replace images when new files are uploaded
-    if (req.files && req.files.length > 0) {
-        // Delete old images from Cloudinary
-        for (const image of product.images) {
-            await deleteImage(image.public_id);
-        }
-
-        // Upload new images
-        const uploadedImages = [];
-
-        for (let i = 0; i < req.files.length; i++) {
-            const result = await uploadImage(
-                req.files[i].buffer,
-                "ecommerce/products"
-            );
-
-            uploadedImages.push({
-                url: result.secure_url,
-                public_id: result.public_id,
-                isPrimary: i === 0,
+    if (__v !== undefined && __v !== null && __v !== '' && !isNaN(Number(__v))) {
+        if (product.__v !== Number(__v)) {
+            return res.status(409).json({
+                success: false,
+                message: "This product was modified by another admin. Please refresh and try again.",
             });
         }
-
-        product.images = uploadedImages;
     }
 
-    // Update only provided fields
-    product.title = title ?? product.title;
-    product.description = description ?? product.description;
-    product.price = price ?? product.price;
-    product.stock = stock ?? product.stock;
-    product.category = category ?? product.category;
-    product.brand = brand ?? product.brand;
-    product.isActive = isActive ?? product.isActive;
+    const oldImages = [...product.images];
 
-    const updatedProduct = await product.save();
+    let retainedExistingImages = oldImages;
+    if (req.body.existingImages !== undefined) {
+        try {
+            const parsed = typeof req.body.existingImages === 'string'
+                ? JSON.parse(req.body.existingImages)
+                : req.body.existingImages;
+            if (Array.isArray(parsed)) {
+                retainedExistingImages = parsed;
+            }
+        } catch (e) {
+            // keep all if parse fails
+        }
+    }
+
+    const newUploadedImages = [];
+
+    if (req.files && req.files.length > 0) {
+        try {
+            for (let i = 0; i < req.files.length; i++) {
+                const result = await uploadImage(
+                    req.files[i].buffer,
+                    "ecommerce/products"
+                );
+
+                newUploadedImages.push({
+                    url: result.secure_url,
+                    public_id: result.public_id,
+                    isPrimary: false,
+                });
+            }
+        } catch (error) {
+            for (const image of newUploadedImages) {
+                await deleteImage(image.public_id);
+            }
+            throw error;
+        }
+    }
+
+    const combinedImages = [...retainedExistingImages, ...newUploadedImages];
+    if (combinedImages.length > 0) {
+        combinedImages.forEach((img, idx) => {
+            img.isPrimary = idx === 0;
+        });
+    }
+    product.images = combinedImages;
+
+    const changes = getChanges(product, {
+        title,
+        description,
+        price: price !== undefined ? Number(price) : undefined,
+        stock: stock !== undefined ? Number(stock) : undefined,
+        category,
+        brand,
+        isActive,
+    });
+
+    if (title !== undefined) product.title = title;
+    if (description !== undefined) product.description = description;
+    if (price !== undefined) product.price = Number(price);
+    if (stock !== undefined) product.stock = Number(stock);
+    if (category !== undefined) product.category = category;
+    if (brand !== undefined) product.brand = brand;
+    if (isActive !== undefined) product.isActive = Boolean(isActive);
+
+    let updatedProduct;
+    const retainedPublicIds = new Set(retainedExistingImages.map(img => img.public_id));
+    const imagesToDelete = oldImages.filter(img => img.public_id && !retainedPublicIds.has(img.public_id));
+
+    try {
+        updatedProduct = await product.save();
+        for (const image of imagesToDelete) {
+            await deleteImage(image.public_id);
+        }
+    } catch (error) {
+        if (error.name === "VersionError") {
+            return res.status(409).json({
+                success: false,
+                message: "This product was modified by another admin. Please refresh and try again.",
+            });
+        }
+        throw error;
+    }
+
+    await logAdminAction({
+        req,
+        admin: req.user._id,
+        action: "UPDATE",
+        entityType: "Product",
+        entityId: updatedProduct._id,
+        changes,
+    });
 
     res.status(200).json({
         success: true,
         message: "Product updated successfully.",
         product: updatedProduct,
     });
-
 });
 
 // @desc Delete Product
@@ -291,17 +380,28 @@ export const deleteProduct = asyncHandler(async (req, res) => {
         });
     }
 
-    for(const image of product.images){
+    for (const image of product.images) {
 
-    await deleteImage(
+        await deleteImage(
 
-        image.public_id
+            image.public_id
 
-    );
+        );
 
-}
+    }
 
-await product.deleteOne();
+    await product.deleteOne();
+
+    await logAdminAction({
+        req,
+        admin: req.user._id,
+        action: "DELETE",
+        entityType: "Product",
+        entityId: product._id,
+        changes: {
+            title: product.title,
+        },
+    });
 
     res.status(200).json({
         success: true,

@@ -37,6 +37,7 @@ const AdminProducts = lazy(() => import('@/pages/admin/Products'));
 const AddProduct = lazy(() => import('@/pages/admin/AddProduct'));
 const EditProduct = lazy(() => import('@/pages/admin/EditProduct'));
 const AdminOrders = lazy(() => import('@/pages/admin/Orders'));
+const AuditLogs = lazy(() => import('@/pages/admin/AuditLogs'));
 
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={<Loader size="lg" />}>{children}</Suspense>
@@ -124,6 +125,7 @@ const AppRouter = () => {
           <Route path="admin/products/new" element={<AddProduct />} />
           <Route path="admin/products/edit/:id" element={<EditProduct />} />
           <Route path="admin/orders" element={<AdminOrders />} />
+          <Route path="admin/audit-logs" element={<AuditLogs />} />
         </Route>
 
         {/* 404 */}
