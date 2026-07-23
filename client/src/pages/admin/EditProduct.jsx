@@ -60,6 +60,10 @@ const EditProduct = () => {
     ]);
   };
 
+  const removeExistingImage = (index) => {
+    setExistingImages((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
   const removeNewFile = (i) => {
     setFiles((prev) => prev.filter((_, idx) => idx !== i));
     setPreviews((prev) => prev.filter((_, idx) => idx !== i));
@@ -70,6 +74,10 @@ const EditProduct = () => {
     Object.entries(formData).forEach(([key, val]) => {
       if (val !== undefined && val !== null) fd.append(key, val);
     });
+    if (data?.product?.__v !== undefined) {
+      fd.append('__v', data.product.__v);
+    }
+    fd.append('existingImages', JSON.stringify(existingImages));
     files.forEach((file) => fd.append('images', file));
 
     updateProduct.mutate(
@@ -90,19 +98,19 @@ const EditProduct = () => {
         <div className="flex items-center gap-4 mb-8">
           <button 
             onClick={() => navigate('/admin/products')}
-            className="w-10 h-10 rounded-xl bg-white border border-border/60 flex items-center justify-center text-muted hover:text-primary hover:border-border transition-colors shadow-sm"
+            className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-300 transition-colors shadow-xs"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-3xl font-display font-bold text-primary tracking-tight">
+          <h1 className="text-3xl font-display font-bold text-slate-900 tracking-tight">
             Edit Product
           </h1>
         </div>
 
-        <div className="bg-white rounded-3xl border border-border/60 p-8 shadow-sm">
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-5 border-b border-border/40 pb-8">
-              <h3 className="text-lg font-semibold text-primary mb-4">Basic Information</h3>
+            <div className="space-y-5 border-b border-slate-200/60 pb-8">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Basic Information</h3>
               <Input
                 label="Product Title"
                 {...register('title')}
@@ -110,25 +118,25 @@ const EditProduct = () => {
               />
 
               <div>
-                <label className="block text-sm font-medium text-primary mb-2">
+                <label className="block text-sm font-medium text-slate-900 mb-2">
                   Description
                 </label>
                 <textarea
                   rows={4}
                   {...register('description')}
-                  className="w-full px-4 py-3 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all duration-300 resize-none hover:border-border-dark"
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 resize-none hover:border-slate-300 text-slate-900"
                 />
                 {errors.description && (
-                  <p className="mt-1.5 text-xs text-error flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-error" />
+                  <p className="mt-1.5 text-xs text-rose-500 flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-rose-500" />
                     {errors.description.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-5 border-b border-border/40 pb-8">
-              <h3 className="text-lg font-semibold text-primary mb-4">Pricing & Inventory</h3>
+            <div className="space-y-5 border-b border-slate-200/60 pb-8">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Pricing & Inventory</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Input
                   label="Price (₹)"
@@ -140,8 +148,8 @@ const EditProduct = () => {
               </div>
             </div>
 
-            <div className="space-y-5 border-b border-border/40 pb-8">
-              <h3 className="text-lg font-semibold text-primary mb-4">Organization</h3>
+            <div className="space-y-5 border-b border-slate-200/60 pb-8">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Organization</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Input
                   label="Category"
@@ -154,57 +162,64 @@ const EditProduct = () => {
 
             {/* Existing Images */}
             {existingImages.length > 0 && (
-              <div className="pt-2 pb-6 border-b border-border/40">
+              <div className="pt-2 pb-6 border-b border-slate-200/60">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-primary mb-1">Current Images</h3>
-                  <p className="text-sm text-muted">These images are currently live on the product page.</p>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">Current Images</h3>
+                  <p className="text-xs text-slate-500">Hover over an image to remove it. First image is the main display photo.</p>
                 </div>
                 <div className="flex flex-wrap gap-4">
                   {existingImages.map((img, i) => (
                     <div
-                      key={i}
-                      className="w-24 h-24 rounded-2xl overflow-hidden border border-border/60 shadow-sm"
+                      key={img.public_id || i}
+                      className="relative w-24 h-24 rounded-2xl overflow-hidden border border-slate-200 group shadow-xs bg-slate-50"
                     >
                       <img
                         src={img.url}
                         alt=""
                         className="w-full h-full object-cover"
                       />
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(i)}
+                          className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-colors transform scale-75 group-hover:scale-100 duration-200 shadow-md"
+                          title="Remove image"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs font-medium text-warning mt-4 bg-warning/10 inline-block px-3 py-2 rounded-lg border border-warning/20">
-                  Note: Uploading new images below will replace all existing ones.
-                </p>
               </div>
             )}
 
             {/* New Images */}
             <div className="space-y-4 pt-2">
               <div>
-                <h3 className="text-lg font-semibold text-primary mb-1">Upload New Images</h3>
-                <p className="text-sm text-muted">Upload up to 5 high-quality images. The first image will be the cover.</p>
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">Upload Additional Images</h3>
+                <p className="text-xs text-slate-500">Upload up to 5 total images for this product.</p>
               </div>
               <div className="flex flex-wrap gap-4">
                 {previews.map((preview, i) => (
                   <div
                     key={i}
-                    className="relative w-24 h-24 rounded-2xl overflow-hidden border border-border/60 group shadow-sm"
+                    className="relative w-24 h-24 rounded-2xl overflow-hidden border border-slate-200 group shadow-xs"
                   >
                     <img src={preview} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
                         type="button"
                         onClick={() => removeNewFile(i)}
-                        className="w-8 h-8 rounded-full bg-error text-white flex items-center justify-center hover:bg-error-dark transition-colors transform scale-75 group-hover:scale-100 duration-200"
+                        className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-colors transform scale-75 group-hover:scale-100 duration-200 shadow-md"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 ))}
-                {files.length < 5 && (
-                  <label className="w-24 h-24 rounded-2xl border-2 border-dashed border-border hover:border-accent hover:bg-accent/[0.02] flex flex-col items-center justify-center cursor-pointer transition-colors text-muted hover:text-accent gap-1">
+                {existingImages.length + files.length < 5 && (
+                  <label className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 flex flex-col items-center justify-center cursor-pointer transition-colors text-slate-400 hover:text-emerald-600 gap-1">
                     <ImagePlus className="w-6 h-6" />
                     <span className="text-[10px] font-semibold uppercase tracking-wider">Upload</span>
                     <input
@@ -219,7 +234,7 @@ const EditProduct = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-6 border-t border-border/60">
+            <div className="flex justify-end gap-3 pt-6 border-t border-slate-200/60">
               <Button
                 type="button"
                 variant="ghost"
