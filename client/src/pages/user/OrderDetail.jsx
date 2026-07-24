@@ -1,16 +1,19 @@
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Package, MapPin, CreditCard, Clock, ChevronRight } from 'lucide-react';
+import { Package, MapPin, CreditCard, Clock, ChevronRight, Download } from 'lucide-react';
 import { useOrderById } from '@/hooks/useOrders';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import Loader from '@/components/ui/Loader';
 import ErrorState from '@/components/ui/ErrorState';
+import { useDownloadInvoice } from '@/hooks/useInvoice';
 
 const statusSteps = ['Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered'];
 
 const OrderDetail = () => {
   const { id } = useParams();
   const { data, isLoading, isError, refetch } = useOrderById(id);
+  const downloadInvoice = useDownloadInvoice();
   const order = data?.order;
 
   if (isLoading) return <div className="py-20 flex justify-center"><Loader size="lg" /></div>;
@@ -176,6 +179,21 @@ const OrderDetail = () => {
                     })}
                   </span>
                 </div>
+              </div>
+
+              {/* Download Invoice */}
+              <div className="pt-4 mt-2 border-t border-border/40">
+                <Button
+                  fullWidth
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadInvoice.mutate(id)}
+                  loading={downloadInvoice.isPending}
+                  disabled={downloadInvoice.isPending}
+                >
+                  <Download className="w-4 h-4" />
+                  Download Invoice
+                </Button>
               </div>
             </div>
             

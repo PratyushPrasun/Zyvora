@@ -5,6 +5,7 @@ import Product from "../models/product.js";
 import Address from "../models/Address.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { createOrderFromCart } from "../services/orderService.js";
+import { generateInvoiceForOrder } from "../services/invoiceService.js";
 
 // @desc Create Order
 // @route POST /api/orders
@@ -36,6 +37,15 @@ export const createOrder = asyncHandler(async (req, res) => {
         });
 
         await session.commitTransaction();
+
+        // Trigger invoice generation (async, non-blocking)
+        generateInvoiceForOrder(order, req.user)
+            .catch((err) =>
+                console.error(
+                    "[INVOICE] COD invoice generation failed:",
+                    err.message
+                )
+            );
 
         res.status(201).json({
 

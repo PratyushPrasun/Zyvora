@@ -5,6 +5,8 @@ import {
     verifyRazorpayPayment,
 } from "../services/paymentService.js";
 
+import { generateInvoiceForOrder } from "../services/invoiceService.js";
+
 
 // @desc Create Razorpay Order
 // @route POST /api/payments/create-order
@@ -68,6 +70,15 @@ export const verifyPayment = asyncHandler(async (req, res) => {
         razorpaySignature,
 
     });
+
+    // Trigger invoice generation (async, non-blocking)
+    generateInvoiceForOrder(result.order, req.user, result.payment)
+        .catch((err) =>
+            console.error(
+                "[INVOICE] Online payment invoice generation failed:",
+                err.message
+            )
+        );
 
     res.status(200).json({
 
