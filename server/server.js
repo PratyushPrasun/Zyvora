@@ -22,6 +22,8 @@ import addressRoutes from "./routes/addressRoutes.js";
 
 import paymentRoutes from "./routes/paymentRoutes.js";
 
+import invoiceRoutes from "./routes/invoiceRoutes.js";
+
 import errorMiddleware from "./middleware/errorMiddleware.js";
 
 import { connectRedis } from "./config/redis.js";
@@ -56,6 +58,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/admin", dashboardRoutes);
 app.use("/api/address", addressRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 // Global Error Handler
 app.use(errorMiddleware);

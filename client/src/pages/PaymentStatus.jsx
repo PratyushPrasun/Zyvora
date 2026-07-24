@@ -1,15 +1,17 @@
 import { useSearchParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Package, ArrowRight, ShieldCheck } from 'lucide-react';
+import { CheckCircle, XCircle, Package, Download, ShieldCheck } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
+import { useDownloadInvoice } from '@/hooks/useInvoice';
 
 const PaymentStatus = () => {
   const [params] = useSearchParams();
   const status = params.get('status');
   const orderId = params.get('orderId');
   const success = status === 'success';
+  const downloadInvoice = useDownloadInvoice();
 
   return (
     <>
@@ -67,12 +69,25 @@ const PaymentStatus = () => {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {success && orderId ? (
-                <Link to={`/account/orders/${orderId}`} className="w-full sm:w-auto">
-                  <Button size="xl" variant="glow" fullWidth>
-                    <Package className="w-5 h-5" />
-                    Track Order
+                <>
+                  <Link to={`/account/orders/${orderId}`} className="w-full sm:w-auto">
+                    <Button size="xl" variant="glow" fullWidth>
+                      <Package className="w-5 h-5" />
+                      Track Order
+                    </Button>
+                  </Link>
+                  <Button
+                    size="xl"
+                    variant="outline"
+                    fullWidth
+                    onClick={() => downloadInvoice.mutate(orderId)}
+                    loading={downloadInvoice.isPending}
+                    disabled={downloadInvoice.isPending}
+                  >
+                    <Download className="w-5 h-5" />
+                    Download Invoice
                   </Button>
-                </Link>
+                </>
               ) : (
                 <Link to="/checkout" className="w-full sm:w-auto">
                   <Button size="xl" variant="danger" fullWidth>Try Again</Button>

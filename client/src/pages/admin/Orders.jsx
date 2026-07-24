@@ -1,7 +1,8 @@
 import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
-import { ShoppingCart, Search, Filter } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Download } from 'lucide-react';
 import { useAllOrders, useUpdateOrderStatus } from '@/hooks/useOrders';
+import { useDownloadInvoice } from '@/hooks/useInvoice';
 import Skeleton from '@/components/ui/Skeleton';
 import ErrorState from '@/components/ui/ErrorState';
 import EmptyState from '@/components/ui/EmptyState';
@@ -34,6 +35,7 @@ const format = (val) =>
 const AdminOrders = () => {
   const { data, isLoading, isError, refetch } = useAllOrders();
   const updateStatus = useUpdateOrderStatus();
+  const downloadInvoice = useDownloadInvoice();
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
 
@@ -187,22 +189,32 @@ const AdminOrders = () => {
                         })}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <select
-                          value={order.orderStatus}
-                          onChange={(e) =>
-                            updateStatus.mutate({
-                              id: order._id,
-                              orderStatus: e.target.value,
-                            })
-                          }
-                          className="text-xs font-medium bg-white border border-slate-200 text-slate-900 rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer shadow-2xs"
-                        >
-                          {STATUS_OPTIONS.map((s) => (
-                            <option key={s} value={s} className="bg-white text-slate-900">
-                              {s}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => downloadInvoice.mutate(order._id)}
+                            disabled={downloadInvoice.isPending}
+                            title="Download Invoice"
+                            className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                          <select
+                            value={order.orderStatus}
+                            onChange={(e) =>
+                              updateStatus.mutate({
+                                id: order._id,
+                                orderStatus: e.target.value,
+                              })
+                            }
+                            className="text-xs font-medium bg-white border border-slate-200 text-slate-900 rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer shadow-2xs"
+                          >
+                            {STATUS_OPTIONS.map((s) => (
+                              <option key={s} value={s} className="bg-white text-slate-900">
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </td>
                     </tr>
                   ))}
