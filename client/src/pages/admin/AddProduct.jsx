@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Upload, X, ImagePlus, ArrowLeft } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { useCreateProduct } from '@/hooks/useProducts';
+import SearchableSelect from '@/components/ui/SearchableSelect';
+import { useCreateProduct, useCategories } from '@/hooks/useProducts';
 
 const schema = z.object({
   title: z.string().min(3, 'Title is required'),
@@ -21,12 +22,14 @@ const schema = z.object({
 const AddProduct = () => {
   const navigate = useNavigate();
   const createProduct = useCreateProduct();
+  const { data: categories = [] } = useCategories();
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
 
@@ -128,11 +131,19 @@ const AddProduct = () => {
             <div className="space-y-5 border-b border-border/40 pb-8">
               <h3 className="text-lg font-semibold text-primary mb-4">Organization</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <Input
-                  label="Category"
-                  placeholder="e.g. Accessories"
-                  {...register('category')}
-                  error={errors.category?.message}
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchableSelect
+                      label="Category"
+                      placeholder="Select category..."
+                      options={categories}
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      error={errors.category?.message}
+                    />
+                  )}
                 />
                 <Input
                   label="Brand (Optional)"

@@ -13,8 +13,7 @@ const NotFound = () => {
 
       <div className="min-h-[85vh] flex items-center justify-center bg-surface relative overflow-hidden">
         {/* Dramatic background effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -26,7 +25,7 @@ const NotFound = () => {
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 1, type: "spring" }}
-            className="text-8xl sm:text-9xl lg:text-[12rem] font-display font-bold text-transparent bg-clip-text bg-gradient-to-b from-primary to-primary/20 tracking-tighter leading-none select-none"
+            className="text-8xl sm:text-9xl lg:text-[12rem] font-display font-bold text-transparent bg-clip-text bg-gradient-to-b from-primary to-primary/20 tracking-tighter leading-none select-none drop-shadow-sm"
           >
             404
           </motion.h1>
@@ -38,7 +37,7 @@ const NotFound = () => {
           </p>
           <Link to="/">
             <Button variant="glow" size="xl">
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 mr-2" />
               Return to Home
             </Button>
           </Link>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Package, Search, Tag } from 'lucide-react';
@@ -16,6 +16,12 @@ const AdminProducts = () => {
   const deleteProduct = useDeleteProduct();
 
   const products = data?.products || [];
+
+  useEffect(() => {
+    if (data && products.length === 0 && page > 1) {
+      setPage((prev) => Math.max(1, prev - 1));
+    }
+  }, [data, products.length, page]);
 
   const format = (val) =>
     new Intl.NumberFormat('en-IN', {

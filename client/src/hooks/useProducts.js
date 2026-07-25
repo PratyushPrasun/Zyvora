@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as productsApi from '@/api/products.api';
 import { toast } from 'sonner';
+import { DEFAULT_CATEGORIES } from '@/constants/categories';
 
 export const productKeys = {
   all: ['products'],
@@ -8,6 +9,23 @@ export const productKeys = {
   list: (params) => [...productKeys.lists(), params],
   details: () => [...productKeys.all, 'detail'],
   detail: (id) => [...productKeys.details(), id],
+  categories: () => [...productKeys.all, 'categories'],
+};
+
+export const useCategories = () => {
+  return useQuery({
+    queryKey: productKeys.categories(),
+    queryFn: async () => {
+      try {
+        const res = await productsApi.getCategories();
+        return res.data?.categories || DEFAULT_CATEGORIES;
+      } catch (err) {
+        return DEFAULT_CATEGORIES;
+      }
+    },
+    initialData: DEFAULT_CATEGORIES,
+    staleTime: 1000 * 60 * 15,
+  });
 };
 
 export const useProducts = (params = {}) => {

@@ -39,6 +39,7 @@ const Testimonials = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Staggered card entrance reveal
       gsap.from('.testimonial-card', {
         scrollTrigger: {
           trigger: '.testimonial-grid',
@@ -50,24 +51,43 @@ const Testimonials = () => {
         stagger: 0.2,
         ease: 'power3.out',
       });
+
+      // Floating ambient background motion
+      gsap.to('.ambient-glow-1', {
+        y: -30,
+        x: 20,
+        duration: 6,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.easeInOut',
+      });
+
+      gsap.to('.ambient-glow-2', {
+        y: 30,
+        x: -20,
+        duration: 8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.easeInOut',
+      });
     }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={containerRef} className="py-24 lg:py-32 bg-[#0a0a0a] relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-accent/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[30vw] h-[30vw] bg-white/5 rounded-full blur-[100px]" />
+    <section ref={containerRef} className="py-12 lg:py-16 bg-[#0a0a0a] relative overflow-hidden">
+      {/* Background motion glowing elements */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="ambient-glow-1 absolute top-0 right-0 w-[45vw] h-[45vw] bg-accent/10 rounded-full blur-[140px]" />
+        <div className="ambient-glow-2 absolute bottom-0 left-0 w-[35vw] h-[35vw] bg-white/5 rounded-full blur-[120px]" />
       </div>
 
       <Container className="relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-20">
-          <span className="text-accent tracking-[0.2em] uppercase text-sm font-semibold mb-4 block">Testimonials</span>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white mb-6">
-            Words From Our <span className="text-gradient-green italic font-light">Community</span>
+          <span className="text-accent tracking-[0.25em] uppercase text-xs font-bold mb-4 block">Community Reviews</span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white mb-6 tracking-tight">
+            Words From Our <span className="text-accent italic font-light">Community</span>
           </h2>
           <div className="flex items-center justify-center gap-2 mt-6">
             <div className="flex text-accent">
@@ -75,40 +95,42 @@ const Testimonials = () => {
                 <Star key={i} className="w-5 h-5 fill-current" />
               ))}
             </div>
-            <span className="text-white/80 font-medium ml-2">4.9/5 Average Rating</span>
+            <span className="text-white/80 font-semibold text-sm ml-2">4.9/5 Average Rating</span>
           </div>
         </div>
 
         <div className="testimonial-grid grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
           {testimonials.map((item) => (
-            <div 
+            <motion.div
               key={item.id}
-              className="testimonial-card bg-[#111] border border-white/10 rounded-[2rem] p-8 md:p-10 relative group hover:border-accent/30 transition-colors duration-500"
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="testimonial-card bg-[#111] border border-white/10 rounded-[2.5rem] p-8 md:p-10 relative group hover:border-accent/40 transition-colors duration-500 shadow-2xl"
             >
-              <Quote className="absolute top-8 right-8 w-12 h-12 text-white/5 rotate-180 group-hover:text-accent/10 transition-colors duration-500" />
-              
+              <Quote className="absolute top-8 right-8 w-12 h-12 text-white/5 rotate-180 group-hover:text-accent/20 transition-colors duration-500" />
+
               <div className="flex text-accent mb-6">
                 {[...Array(item.rating)].map((_, i) => (
                   <Star key={i} className="w-4 h-4 fill-current" />
                 ))}
               </div>
-              
-              <p className="text-white/80 text-lg leading-relaxed mb-10 min-h-[120px] font-light">
+
+              <p className="text-white/80 text-base sm:text-lg leading-relaxed mb-10 min-h-[120px] font-light">
                 "{item.content}"
               </p>
-              
+
               <div className="flex items-center gap-4 pt-6 border-t border-white/10">
-                <img 
-                  src={item.image} 
-                  alt={item.name} 
-                  className="w-14 h-14 rounded-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-14 h-14 rounded-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500 border border-white/10"
                 />
                 <div>
-                  <h4 className="text-white font-medium">{item.name}</h4>
-                  <p className="text-white/40 text-sm">{item.role}</p>
+                  <h4 className="text-white font-bold text-base">{item.name}</h4>
+                  <p className="text-white/40 text-xs font-medium">{item.role}</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </Container>

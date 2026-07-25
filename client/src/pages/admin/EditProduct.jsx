@@ -8,7 +8,8 @@ import { Save, X, ImagePlus, ArrowLeft } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Loader from '@/components/ui/Loader';
-import { useProduct, useUpdateProduct } from '@/hooks/useProducts';
+import SearchableSelect from '@/components/ui/SearchableSelect';
+import { useProduct, useUpdateProduct, useCategories } from '@/hooks/useProducts';
 
 const schema = z.object({
   title: z.string().min(3, 'Title is required'),
@@ -23,6 +24,7 @@ const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, isLoading } = useProduct(id);
+  const { data: fetchedCategories = [] } = useCategories();
   const updateProduct = useUpdateProduct();
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -32,6 +34,7 @@ const EditProduct = () => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
 
@@ -50,6 +53,12 @@ const EditProduct = () => {
       setExistingImages(p.images || []);
     }
   }, [data, reset]);
+
+  // Combine categories and current product category if not present
+  const currentCategory = data?.product?.category;
+  const categoriesList = currentCategory && !fetchedCategories.includes(currentCategory)
+    ? [...fetchedCategories, currentCategory]
+    : fetchedCategories;
 
   const handleFileChange = (e) => {
     const selected = Array.from(e.target.files);
@@ -151,10 +160,19 @@ const EditProduct = () => {
             <div className="space-y-5 border-b border-slate-200/60 pb-8">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Organization</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <Input
-                  label="Category"
-                  {...register('category')}
-                  error={errors.category?.message}
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchableSelect
+                      label="Category"
+                      placeholder="Select category..."
+                      options={categoriesList}
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      error={errors.category?.message}
+                    />
+                  )}
                 />
                 <Input label="Brand" {...register('brand')} />
               </div>

@@ -1,8 +1,20 @@
 import Product from "../models/product.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadImage, deleteImage } from "../utils/cloudinaryHelper.js";
-import { deleteCache, getCache, setCache } from "../services/cacheServices.js";
+import { deleteCache, deleteCacheByPattern, getCache, setCache } from "../services/cacheServices.js";
 import { logAdminAction } from "../services/auditService.js";
+import { CATEGORIES } from "../constants/categories.js";
+
+// @desc Get All Categories
+// @route GET /api/products/categories
+// @access Public
+
+export const getCategories = asyncHandler(async (req, res) => {
+    res.status(200).json({
+        success: true,
+        categories: CATEGORIES,
+    });
+});
 
 // @desc Get All Products
 // @route GET /api/products
@@ -43,6 +55,16 @@ export const getProducts = asyncHandler(async (req, res) => {
         }
     }
 
+    // Rating Filter
+    if (req.query.rating) {
+        query.averageRating = { $gte: Number(req.query.rating) };
+    }
+
+    // Availability Filter
+    if (req.query.availability === "inStock" || req.query.inStock === "true") {
+        query.stock = { $gt: 0 };
+    }
+
     // Sorting
     let sort = {};
 
@@ -63,7 +85,7 @@ export const getProducts = asyncHandler(async (req, res) => {
             sort.createdAt = -1;
     }
 
-    const cacheKey = "products";
+    const cacheKey = `products:${req.originalUrl || JSON.stringify(req.query)}`;
 
     const cachedProducts = await getCache(cacheKey);
 
@@ -78,19 +100,18 @@ export const getProducts = asyncHandler(async (req, res) => {
         .skip(skip)
         .limit(limit);
 
-    await setCache(cacheKey, products, 300);
-
-    res.status(200).json({
+    const responseData = {
         success: true,
         currentPage: page,
         totalPages: Math.ceil(totalProducts / limit),
         totalProducts,
         count: products.length,
         products,
-    });
+    };
 
-    await deleteCache("products");
+    await setCache(cacheKey, responseData, 300);
 
+    res.status(200).json(responseData);
 });
 
 // @desc Get Single Product
@@ -196,6 +217,8 @@ export const addProduct = asyncHandler(async (req, res) => {
         brand: brand || "",
         images: uploadedImages,
     });
+
+    await deleteCacheByPattern("products:*");
 
     await logAdminAction({
         req,
@@ -349,6 +372,8 @@ export const updateProduct = asyncHandler(async (req, res) => {
         throw error;
     }
 
+    await deleteCacheByPattern("products:*");
+
     await logAdminAction({
         req,
         admin: req.user._id,
@@ -380,17 +405,19 @@ export const deleteProduct = asyncHandler(async (req, res) => {
         });
     }
 
-    for (const image of product.images) {
-
-        await deleteImage(
-
-            image.public_id
-
-        );
-
+    for (const image of product.images || []) {
+        if (image?.public_id) {
+            try {
+                await deleteImage(image.public_id);
+            } catch (err) {
+                console.error("Cloudinary image deletion error:", err);
+            }
+        }
     }
 
     await product.deleteOne();
+
+    await deleteCacheByPattern("products:*");
 
     await logAdminAction({
         req,

@@ -47,18 +47,24 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-            className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizes[size]} max-h-[85vh] overflow-hidden border border-border/30`}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className={`relative bg-white rounded-3xl shadow-2xl w-full ${sizes[size]} max-h-[85vh] overflow-hidden border border-border/30`}
           >
+            {/* Accent bar */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent via-accent-light to-accent opacity-60" />
+            
             <div className="flex items-center justify-between p-6 border-b border-border/60">
-              <h2 className="text-lg font-semibold font-display">{title}</h2>
-              <button
+              <h2 className="text-lg font-semibold font-display text-primary">{title}</h2>
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 onClick={onClose}
-                className="p-2 rounded-xl hover:bg-surface-dark transition-all duration-200 text-muted hover:text-primary"
+                className="p-2 rounded-xl hover:bg-surface-dark transition-colors duration-200 text-muted hover:text-primary"
                 aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)]">
               {children}

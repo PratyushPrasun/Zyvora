@@ -2,6 +2,7 @@ import express from "express";
 
 import {
     getProducts,
+    getCategories,
     getProductById,
     addProduct,
     updateProduct,
@@ -14,6 +15,7 @@ import upload from "../middleware/uploadMiddleware.js";
 const router = express.Router();
 
 router.get("/", getProducts);
+router.get("/categories", getCategories);
 
 router.get("/:id", getProductById);
 
