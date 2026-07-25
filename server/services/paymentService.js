@@ -2,7 +2,7 @@ import crypto, { randomUUID } from "crypto";
 import mongoose from "mongoose";
 
 import razorpay from "../config/razorpay.js";
-import Payment from "../models/payment.js";
+import Payment from "../models/Payment.js";
 import { createOrderFromCart } from "./orderService.js";
 import {
     validateCart,
@@ -159,138 +159,138 @@ export const verifyRazorpayPayment = async ({
 
 }) => {
     const expectedSignature = crypto
-    .createHmac(
-        "sha256",
-        process.env.RAZORPAY_KEY_SECRET
-    )
-    .update(
-        `${razorpayOrderId}|${razorpayPaymentId}`
-    )
-    .digest("hex");
+        .createHmac(
+            "sha256",
+            process.env.RAZORPAY_KEY_SECRET
+        )
+        .update(
+            `${razorpayOrderId}|${razorpayPaymentId}`
+        )
+        .digest("hex");
 
-if (expectedSignature !== razorpaySignature) {
+    if (expectedSignature !== razorpaySignature) {
 
-    throw new Error("Invalid payment signature.");
+        throw new Error("Invalid payment signature.");
 
-}
+    }
 
-const razorpayPayment =
-    await razorpay.payments.fetch(
-        razorpayPaymentId
-    );
+    const razorpayPayment =
+        await razorpay.payments.fetch(
+            razorpayPaymentId
+        );
 
     console.log(razorpayPayment);
 
-if (
-    razorpayPayment.status !== "captured" &&
-    razorpayPayment.status !== "authorized"
-) {
-    throw new Error("Payment is not successful.");
-}
+    if (
+        razorpayPayment.status !== "captured" &&
+        razorpayPayment.status !== "authorized"
+    ) {
+        throw new Error("Payment is not successful.");
+    }
 
-if (
+    if (
 
-    razorpayPayment.order_id !== razorpayOrderId
+        razorpayPayment.order_id !== razorpayOrderId
 
-) {
+    ) {
 
-    throw new Error(
-        "Order mismatch."
-    );
+        throw new Error(
+            "Order mismatch."
+        );
 
-}
+    }
 
-const session =
-    await mongoose.startSession();
+    const session =
+        await mongoose.startSession();
 
-try{
+    try {
 
-session.startTransaction();
+        session.startTransaction();
 
-const order =
-await createOrderFromCart({
+        const order =
+            await createOrderFromCart({
 
-    userId,
+                userId,
 
-    addressId,
+                addressId,
 
-    paymentMethod:"ONLINE",
+                paymentMethod: "ONLINE",
 
-    paymentStatus:"Paid",
+                paymentStatus: "Paid",
 
-    paymentInfo:{
+                paymentInfo: {
 
-        razorpayOrderId,
+                    razorpayOrderId,
 
-        razorpayPaymentId,
+                    razorpayPaymentId,
 
-        razorpaySignature,
+                    razorpaySignature,
 
-    },
+                },
 
-    session,
+                session,
 
-});
-const existingPayment = await Payment.findOne({
-    gatewayPaymentId: razorpayPaymentId,
-}).session(session);
+            });
+        const existingPayment = await Payment.findOne({
+            gatewayPaymentId: razorpayPaymentId,
+        }).session(session);
 
-if (existingPayment) {
-    throw new Error("Payment already verified.");
-}
-const payment =
-await Payment.create([{
+        if (existingPayment) {
+            throw new Error("Payment already verified.");
+        }
+        const payment =
+            await Payment.create([{
 
-    user:userId,
+                user: userId,
 
-    order:order._id,
+                order: order._id,
 
-    gateway:"RAZORPAY",
+                gateway: "RAZORPAY",
 
-    paymentMethod:"ONLINE",
+                paymentMethod: "ONLINE",
 
-    status:"Paid",
+                status: "Paid",
 
-    amount:razorpayPayment.amount,
+                amount: razorpayPayment.amount,
 
-    currency:razorpayPayment.currency,
+                currency: razorpayPayment.currency,
 
-    gatewayOrderId:razorpayOrderId,
+                gatewayOrderId: razorpayOrderId,
 
-    gatewayPaymentId:razorpayPaymentId,
+                gatewayPaymentId: razorpayPaymentId,
 
-    gatewaySignature:razorpaySignature,
+                gatewaySignature: razorpaySignature,
 
-    paidAt:new Date(),
+                paidAt: new Date(),
 
-}],{
+            }], {
 
-    session,
+                session,
 
-});
+            });
 
-await session.commitTransaction();
+        await session.commitTransaction();
 
-return{
+        return {
 
-    order,
+            order,
 
-    payment:payment[0],
+            payment: payment[0],
 
-};
+        };
 
-}
-catch(error){
+    }
+    catch (error) {
 
-    await session.abortTransaction();
+        await session.abortTransaction();
 
-    throw error;
+        throw error;
 
-}
-finally{
+    }
+    finally {
 
-    session.endSession();
+        session.endSession();
 
-}
+    }
 
 };
