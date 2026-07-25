@@ -1,4 +1,5 @@
 import { Minus, Plus, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useUpdateCartItem, useRemoveFromCart } from '@/hooks/useCart';
 import Price from '@/components/ui/Price';
 import { Link } from 'react-router-dom';
@@ -16,66 +17,77 @@ const CartItem = ({ item, compact = false }) => {
     'https://placehold.co/80x80/f4f4f5/a1a1aa?text=Item';
 
   return (
-    <div className="flex gap-4">
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="flex gap-4 sm:gap-5 group"
+    >
       <Link
         to={`/products/${productId}`}
-        className={`${compact ? 'w-16 h-16' : 'w-24 h-24'} shrink-0 rounded-xl overflow-hidden bg-surface`}
+        className={`${compact ? 'w-16 h-16' : 'w-24 h-24 sm:w-28 sm:h-28'} shrink-0 rounded-2xl overflow-hidden bg-surface border border-border/40`}
       >
         <img
           src={image}
           alt={product?.title || 'Product'}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
       </Link>
 
       <div className="flex-1 min-w-0">
         <Link to={`/products/${productId}`}>
-          <h4 className={`font-medium text-primary line-clamp-1 hover:text-accent transition-colors duration-200 ${compact ? 'text-sm' : ''}`}>
+          <h4 className={`font-medium text-primary line-clamp-1 hover:text-accent transition-colors duration-200 ${compact ? 'text-sm' : 'text-base'}`}>
             {product?.title || 'Product'}
           </h4>
         </Link>
         {!compact && product?.category && (
           <p className="text-xs text-muted mt-0.5">{product.category}</p>
         )}
-        <Price amount={product?.price || 0} size="sm" className="mt-1" />
+        <Price amount={product?.price || 0} size="sm" className="mt-1.5" />
 
-        <div className="flex items-center justify-between mt-2.5">
-          <div className="flex items-center gap-1">
-            <button
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-0.5">
+            <motion.button
+              whileTap={{ scale: 0.85 }}
               onClick={() =>
                 item.quantity > 1
                   ? updateCart.mutate({ productId, quantity: item.quantity - 1 })
                   : removeFromCart.mutate(productId)
               }
-              className="w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent/30 transition-all duration-200"
+              className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent/30 hover:text-accent transition-all duration-200"
               aria-label="Decrease quantity"
             >
               <Minus className="w-3 h-3" />
-            </button>
-            <span className="w-8 text-center text-sm font-medium">
+            </motion.button>
+            <span className="w-10 text-center text-sm font-semibold tabular-nums">
               {item.quantity}
             </span>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.85 }}
               onClick={() =>
                 updateCart.mutate({ productId, quantity: item.quantity + 1 })
               }
-              className="w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent/30 transition-all duration-200"
+              className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent/30 hover:text-accent transition-all duration-200"
               aria-label="Increase quantity"
             >
               <Plus className="w-3 h-3" />
-            </button>
+            </motion.button>
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => removeFromCart.mutate(productId)}
-            className="p-1.5 text-muted hover:text-error transition-all duration-200 rounded-lg hover:bg-error/5"
+            className="p-2 text-muted hover:text-error transition-all duration-200 rounded-xl hover:bg-error/5"
             aria-label="Remove from cart"
           >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

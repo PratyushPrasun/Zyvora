@@ -7,6 +7,8 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import ProtectedRoute from '@/components/routes/ProtectedRoute';
 import AdminRoute from '@/components/routes/AdminRoute';
 import GuestRoute from '@/components/routes/GuestRoute';
+import ScrollToTopOnNavigate from '@/components/common/ScrollToTopOnNavigate';
+import CustomCursor from '@/components/common/CustomCursor';
 
 // Public Pages
 const Home = lazy(() => import('@/pages/Home'));
@@ -45,8 +47,11 @@ const SuspenseWrapper = ({ children }) => (
 
 const AppRouter = () => {
   return (
-    <SuspenseWrapper>
-      <Routes>
+    <>
+      <ScrollToTopOnNavigate />
+      {/* <CustomCursor /> */}
+      <SuspenseWrapper>
+        <Routes>
         {/* Auth Pages (No Navbar/Footer) */}
         <Route
           path="/login"
@@ -132,6 +137,7 @@ const AppRouter = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </SuspenseWrapper>
+    </>
   );
 };
 

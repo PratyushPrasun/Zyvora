@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Eye } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import Rating from '@/components/ui/Rating';
 import Price from '@/components/ui/Price';
 import { useAddToCart } from '@/hooks/useCart';
@@ -29,7 +29,7 @@ const ProductCard = ({ product, index = 0 }) => {
       transition={{ duration: 0.5, delay: index * 0.06, ease: 'easeOut' }}
     >
       <Link to={`/products/${product._id}`} className="group block">
-        <div className="relative overflow-hidden rounded-2xl bg-surface aspect-square mb-4">
+        <div className="relative overflow-hidden rounded-2xl bg-surface aspect-square mb-4 border border-border/30">
           <img
             src={primaryImage}
             alt={product.title}
@@ -53,7 +53,7 @@ const ProductCard = ({ product, index = 0 }) => {
             <div className="absolute bottom-3 right-3 flex items-center gap-2 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
               <motion.button
                 whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.9 }}
                 className="w-10 h-10 rounded-xl bg-accent text-white shadow-lg shadow-accent/25 flex items-center justify-center"
                 onClick={handleAddToCart}
                 aria-label="Add to cart"
@@ -64,9 +64,14 @@ const ProductCard = ({ product, index = 0 }) => {
           )}
 
           {product.stock > 0 && product.stock <= 5 && (
-            <span className="absolute top-3 left-3 text-xs font-medium bg-primary text-white px-3 py-1 rounded-full">
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="absolute top-3 left-3 text-xs font-medium bg-primary text-white px-3 py-1 rounded-full shadow-md"
+            >
               Only {product.stock} left
-            </span>
+            </motion.span>
           )}
         </div>
 

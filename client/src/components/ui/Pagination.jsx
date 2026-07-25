@@ -28,52 +28,66 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   };
 
   return (
-    <nav aria-label="Pagination" className="flex items-center justify-center gap-1.5">
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="p-2.5 rounded-xl hover:bg-surface-dark transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-        aria-label="Previous page"
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </motion.button>
+    <div className="flex flex-col items-center gap-4">
+      <nav aria-label="Pagination" className="flex items-center gap-1.5">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="p-2.5 rounded-xl hover:bg-surface-dark transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed border border-transparent hover:border-border/60"
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </motion.button>
 
-      {getPages().map((page, i) =>
-        page === '...' ? (
-          <span key={`dots-${i}`} className="px-2 text-muted-light select-none">
-            ···
-          </span>
-        ) : (
-          <motion.button
-            key={page}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onPageChange(page)}
-            className={`min-w-[40px] h-10 rounded-xl text-sm font-medium transition-all duration-200 ${
-              currentPage === page
-                ? 'bg-accent text-white shadow-sm shadow-accent/20'
-                : 'hover:bg-surface-dark text-muted'
-            }`}
-            aria-current={currentPage === page ? 'page' : undefined}
-          >
-            {page}
-          </motion.button>
-        )
-      )}
+        {getPages().map((page, i) =>
+          page === '...' ? (
+            <span key={`dots-${i}`} className="px-2 text-muted-light select-none">
+              ···
+            </span>
+          ) : (
+            <motion.button
+              key={page}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onPageChange(page)}
+              className={`relative min-w-[40px] h-10 rounded-xl text-sm font-medium transition-all duration-200 ${
+                currentPage === page
+                  ? 'bg-accent text-white shadow-sm shadow-accent/20'
+                  : 'hover:bg-surface-dark text-muted hover:text-primary'
+              }`}
+              aria-current={currentPage === page ? 'page' : undefined}
+            >
+              {currentPage === page && (
+                <motion.div
+                  layoutId="paginationActive"
+                  className="absolute inset-0 bg-accent rounded-xl shadow-sm shadow-accent/20"
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{page}</span>
+            </motion.button>
+          )
+        )}
 
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="p-2.5 rounded-xl hover:bg-surface-dark transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-        aria-label="Next page"
-      >
-        <ChevronRight className="w-4 h-4" />
-      </motion.button>
-    </nav>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="p-2.5 rounded-xl hover:bg-surface-dark transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed border border-transparent hover:border-border/60"
+          aria-label="Next page"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </motion.button>
+      </nav>
+
+      <p className="text-xs text-muted">
+        Page <span className="font-medium text-primary">{currentPage}</span> of{' '}
+        <span className="font-medium text-primary">{totalPages}</span>
+      </p>
+    </div>
   );
 };
 

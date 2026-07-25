@@ -127,8 +127,8 @@ const InteractiveProductShowcase = () => {
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
 
-  const rotateX = useSpring(useTransform(mouseY, [0, 1], [8, -8]), { stiffness: 120, damping: 25 });
-  const rotateY = useSpring(useTransform(mouseX, [0, 1], [-8, 8]), { stiffness: 120, damping: 25 });
+  const rotateX = useSpring(useTransform(mouseY, [0, 1], [6, -6]), { stiffness: 120, damping: 25 });
+  const rotateY = useSpring(useTransform(mouseX, [0, 1], [-6, 6]), { stiffness: 120, damping: 25 });
 
   // Preload image assets immediately to guarantee seamless 60 FPS transitions
   useEffect(() => {
@@ -174,24 +174,24 @@ const InteractiveProductShowcase = () => {
 
   return (
     <div
-      className="relative w-full max-w-md lg:max-w-none mx-auto perspective-1000"
+      className="relative w-full max-w-xs sm:max-w-md lg:max-w-none mx-auto perspective-1000"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Background Ambient Glow (SVG Gradient - zero scroll blur) */}
-      <div className="absolute -inset-4 bg-gradient-to-tr from-accent/20 via-white/5 to-transparent rounded-[2.5rem] opacity-70 pointer-events-none" />
+      {/* Background Ambient Glow */}
+      <div className="absolute -inset-3 bg-gradient-to-tr from-accent/20 via-white/5 to-transparent rounded-[2rem] opacity-70 pointer-events-none" />
 
       {/* Main Showcase Card Frame */}
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: 1.015 }}
         transition={{ duration: 0.4 }}
-        className="hero-card-dark relative rounded-2xl overflow-hidden p-3 sm:p-4 z-20"
+        className="hero-card-dark relative rounded-2xl overflow-hidden p-2.5 sm:p-3.5 z-20"
       >
         {/* Product Image Wrapper */}
-        <div className="relative aspect-[4/3] sm:aspect-[16/11] rounded-xl overflow-hidden bg-black/40 group">
+        <div className="relative aspect-[16/10] sm:aspect-[16/10] lg:aspect-[16/9.5] rounded-xl overflow-hidden bg-black/40 group max-h-[220px] sm:max-h-[260px] lg:max-h-[290px]">
           {/* Smooth Image Crossfade */}
           <AnimatePresence mode="popLayout">
             <motion.img
@@ -210,7 +210,7 @@ const InteractiveProductShowcase = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500 pointer-events-none z-10" />
 
           {/* Floating Badges Inside Image */}
-          <div className="absolute top-3 left-3 flex items-center gap-2 z-20">
+          <div className="absolute top-2.5 left-2.5 flex items-center gap-2 z-20">
             <AnimatePresence mode="wait">
               <motion.span
                 key={current.id}
@@ -218,14 +218,14 @@ const InteractiveProductShowcase = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.5, ease: transitionEase }}
-                className="hero-badge text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider inline-block"
+                className="hero-badge text-[9px] sm:text-xs font-semibold px-2.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider inline-block"
               >
                 {current.featuredBadge}
               </motion.span>
             </AnimatePresence>
           </div>
 
-          <div className="absolute top-3 right-3 z-20">
+          <div className="absolute top-2.5 right-2.5 z-20">
             <AnimatePresence mode="wait">
               <motion.span
                 key={current.id}
@@ -233,7 +233,7 @@ const InteractiveProductShowcase = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.5, ease: transitionEase }}
-                className="bg-black/70 text-white text-[10px] sm:text-xs px-2.5 py-1 rounded-full border border-white/10 backdrop-none flex items-center gap-1 font-medium inline-flex"
+                className="bg-black/70 text-white text-[9px] sm:text-xs px-2.5 py-0.5 sm:py-1 rounded-full border border-white/10 backdrop-none flex items-center gap-1 font-medium inline-flex"
               >
                 <Zap className="w-3 h-3 text-accent shrink-0" /> {current.stockStatus}
               </motion.span>
@@ -241,7 +241,7 @@ const InteractiveProductShowcase = () => {
           </div>
 
           {/* Bottom Card Title Overlay */}
-          <div className="absolute bottom-3 left-3 right-3 text-white z-20 pointer-events-none">
+          <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white z-20 pointer-events-none">
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.id}
@@ -250,12 +250,12 @@ const InteractiveProductShowcase = () => {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.6, ease: transitionEase }}
               >
-                <div className="text-[11px] uppercase tracking-[0.2em] text-accent font-semibold mb-0.5">
+                <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-accent font-semibold mb-0.5">
                   {current.category}
                 </div>
-                <div className="text-base sm:text-lg font-display font-bold flex items-center justify-between">
+                <div className="text-xs sm:text-base lg:text-lg font-display font-bold flex items-center justify-between">
                   <span>{current.title}</span>
-                  <span className="text-accent font-sans text-sm sm:text-base">{current.price}</span>
+                  <span className="text-accent font-sans text-xs sm:text-sm lg:text-base">{current.price}</span>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -263,7 +263,7 @@ const InteractiveProductShowcase = () => {
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="mt-3.5 px-1 py-1 flex items-center justify-between min-h-[24px]">
+        <div className="mt-2 sm:mt-3 px-1 py-0.5 flex items-center justify-between min-h-[22px]">
           <div className="flex-1 truncate mr-2">
             <AnimatePresence mode="wait">
               <motion.div
@@ -272,9 +272,9 @@ const InteractiveProductShowcase = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.5, ease: transitionEase }}
-                className="flex items-center gap-2 text-white/70 text-xs truncate"
+                className="flex items-center gap-1.5 text-white/70 text-[11px] sm:text-xs truncate"
               >
-                <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 text-accent shrink-0" />
                 <span className="truncate">{current.footerText}</span>
               </motion.div>
             </AnimatePresence>
@@ -282,19 +282,19 @@ const InteractiveProductShowcase = () => {
 
           <Link
             to={current.link}
-            className="text-xs font-semibold text-white hover:text-accent transition-colors flex items-center gap-1.5 group/link shrink-0"
+            className="text-[11px] sm:text-xs font-semibold text-white hover:text-accent transition-colors flex items-center gap-1 sm:gap-1.5 group/link shrink-0"
           >
             <span>Explore</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </div>
       </motion.div>
 
       {/* Floating Accent Tag (Top Right Layer) */}
       <motion.div
-        animate={{ y: [0, -8, 0] }}
+        animate={{ y: [0, -6, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="hero-card-dark absolute -top-5 -right-3 sm:-top-6 sm:-right-6 px-4 py-2.5 rounded-xl z-30 hidden sm:flex items-center gap-3 shadow-xl"
+        className="hero-card-dark absolute -top-4 -right-2 sm:-top-5 sm:-right-4 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl z-30 sm:flex items-center gap-2.5 shadow-xl"
       >
         <div className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0" />
         <AnimatePresence mode="wait">
@@ -305,10 +305,10 @@ const InteractiveProductShowcase = () => {
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.5, ease: transitionEase }}
           >
-            <div className="text-[9px] uppercase tracking-wider text-white/50 font-medium">
+            <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-white/50 font-medium">
               {current.newArrivalLabel}
             </div>
-            <div className="text-xs font-bold text-white font-display">
+            <div className="text-[11px] sm:text-xs font-bold text-white font-display">
               {current.newArrivalTag}
             </div>
           </motion.div>
@@ -317,9 +317,9 @@ const InteractiveProductShowcase = () => {
 
       {/* Floating Accent Rating Tag (Bottom Left Layer) */}
       <motion.div
-        animate={{ y: [0, 8, 0] }}
+        animate={{ y: [0, 6, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        className="hero-card-dark absolute -bottom-5 -left-3 sm:-bottom-6 sm:-left-6 px-4 py-2.5 rounded-xl z-30 hidden sm:flex items-center gap-2.5 shadow-xl"
+        className="hero-card-dark absolute -bottom-4 -left-2 sm:-bottom-5 sm:-left-4 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl z-30 sm:flex items-center gap-2.5 shadow-xl"
       >
         <div className="flex items-center text-amber-400 shrink-0">
           <Star className="w-3.5 h-3.5 fill-amber-400" />
@@ -332,8 +332,8 @@ const InteractiveProductShowcase = () => {
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.5, ease: transitionEase }}
           >
-            <div className="text-xs font-bold text-white">{current.rating}</div>
-            <div className="text-[9px] text-white/50 uppercase tracking-wider font-medium">
+            <div className="text-[11px] sm:text-xs font-bold text-white">{current.rating}</div>
+            <div className="text-[8px] sm:text-[9px] text-white/50 uppercase tracking-wider font-medium">
               {current.reviews}
             </div>
           </motion.div>
@@ -400,7 +400,7 @@ const HeroSection = () => {
   return (
     <section
       ref={containerRef}
-      className="hero-crisp-container relative min-h-[90vh] lg:min-h-screen flex flex-col justify-center bg-[#050505] overflow-hidden pt-24 pb-16 lg:py-20"
+      className="hero-crisp-container relative min-h-[80vh] lg:h-[calc(110vh-4rem)] lg:max-h-[950px] flex flex-col justify-start lg:justify-center bg-[#050505] overflow-hidden pt-12 sm:pt-16 lg:pt-16 pb-8"
     >
       {/* Grain Overlay */}
       <div className="hero-grain" />
@@ -412,12 +412,12 @@ const HeroSection = () => {
       </div>
 
       {/* Background Marquee Ticker */}
-      <div className="absolute top-16 left-0 w-full overflow-hidden pointer-events-none opacity-20 z-0">
+      <div className="absolute top-6 sm:top-10 left-0 w-full overflow-hidden pointer-events-none opacity-20 z-0">
         <div className="hero-marquee-track">
           {Array.from({ length: 10 }).map((_, i) => (
             <span
               key={i}
-              className="text-[12vw] lg:text-[9vw] font-display font-extrabold text-white/[0.03] uppercase tracking-[0.25em] px-8 select-none whitespace-nowrap"
+              className="text-[14vw] sm:text-[12vw] lg:text-[8vw] font-display font-extrabold text-white/[0.03] uppercase tracking-[0.25em] px-8 select-none whitespace-nowrap"
             >
               ZYVORA LUXURY
             </span>
@@ -426,24 +426,24 @@ const HeroSection = () => {
       </div>
 
       {/* Main Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 w-full my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 xl:gap-12 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 w-full mt-1 sm:mt-2 lg:my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10 items-start">
 
           {/* Left Content (Col 1 to 7) */}
           <div className="lg:col-span-7 flex flex-col items-start text-left">
 
             {/* Tagline Badge */}
-            <div className="hero-badge-reveal mb-5 sm:mb-6">
-              <div className="inline-flex items-center gap-2 hero-badge rounded-full px-3.5 py-1.5 sm:px-4 sm:py-2">
-                <Sparkles className="w-3.5 h-3.5 text-accent" />
-                <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] font-semibold">
+            <div className="hero-badge-reveal mb-2 sm:mb-2.5">
+              <div className="inline-flex items-center gap-2 hero-badge rounded-full px-3 py-1 sm:px-3.5 sm:py-1">
+                <Sparkles className="w-3 h-3 text-accent shrink-0" />
+                <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.18em] font-semibold">
                   Curated Elegance & Contemporary Luxury
                 </span>
               </div>
             </div>
 
             {/* Main Headline */}
-            <h1 className="hero-title-reveal text-4xl sm:text-6xl lg:text-6xl xl:text-7xl font-display font-bold tracking-tight text-white leading-[1.06] mb-6">
+            <h1 className="hero-title-reveal text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-display font-bold tracking-tight text-white leading-[1.08] mb-2.5 sm:mb-3.5">
               Refined Living <br />
               <span className="text-gradient-green italic font-normal pr-2">Curated Exclusively</span>
               <br />
@@ -451,20 +451,20 @@ const HeroSection = () => {
             </h1>
 
             {/* Description */}
-            <p className="hero-desc-reveal text-base sm:text-lg text-white/60 font-light leading-relaxed max-w-xl mb-8 sm:mb-10">
+            <p className="hero-desc-reveal text-xs sm:text-base text-white/60 font-light leading-relaxed max-w-xl mb-3 sm:mb-5">
               Discover an extraordinary selection of premium design, fashion, and lifestyle essentials. Crafting timeless aesthetic experiences for the discerning collector.
             </p>
 
             {/* Call to Actions */}
-            <div className="hero-cta-reveal flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto mb-10 sm:mb-12">
+            <div className="hero-cta-reveal flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto mb-4 sm:mb-6">
               <Link to="/shop" className="w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="hero-btn-primary w-full sm:w-auto px-8 py-4 rounded-full font-medium text-sm sm:text-base flex items-center justify-center gap-3 group"
+                  className="hero-btn-primary w-full sm:w-auto px-6 py-3 sm:py-3.5 rounded-full font-medium text-xs sm:text-sm flex items-center justify-center gap-2.5 group cursor-pointer"
                 >
                   <span>Explore Collection</span>
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
               </Link>
 
@@ -472,7 +472,7 @@ const HeroSection = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="hero-btn-secondary w-full sm:w-auto px-7 py-4 rounded-full font-medium text-sm sm:text-base flex items-center justify-center gap-2"
+                  className="hero-btn-secondary w-full sm:w-auto px-5 py-3 sm:py-3.5 rounded-full font-medium text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Featured Catalog</span>
                 </motion.button>
@@ -480,16 +480,16 @@ const HeroSection = () => {
             </div>
 
             {/* Metrics Bar */}
-            <div className="hero-stats-reveal w-full pt-6 border-t border-white/10">
-              <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-lg">
+            <div className="hero-stats-reveal w-full pt-3 sm:pt-4 border-t border-white/10">
+              <div className="grid grid-cols-3 gap-2 sm:gap-6 max-w-md">
                 <AnimatedCounter target={500} suffix="+" label="Curated Products" />
                 <AnimatedCounter target={50} suffix="K+" label="Global Clients" />
                 <div className="hero-stat-item flex flex-col">
-                  <div className="text-2xl sm:text-3xl font-bold text-white font-display tracking-tight flex items-center gap-1.5">
-                    <Star className="w-5 h-5 text-accent fill-accent" />
+                  <div className="text-xl sm:text-2xl font-bold text-white font-display tracking-tight flex items-center gap-1">
+                    <Star className="w-4 h-4 text-accent fill-accent" />
                     <span>4.9</span>
                   </div>
-                  <div className="text-[11px] sm:text-xs text-white/50 uppercase tracking-[0.15em] font-medium mt-1">
+                  <div className="text-[9px] sm:text-[11px] text-white/50 uppercase tracking-[0.15em] font-medium mt-0.5">
                     Client Rating
                   </div>
                 </div>
@@ -499,26 +499,26 @@ const HeroSection = () => {
           </div>
 
           {/* Right Visual Showcase (Col 8 to 12) */}
-          <div className="hero-card-reveal lg:col-span-5 w-full mt-4 lg:mt-0">
+          <div className="hero-card-reveal lg:col-span-5 w-full pt-1 lg:pt-0">
             <InteractiveProductShowcase />
           </div>
 
         </div>
       </div>
 
-      {/* Minimal Scroll Cue Button (Replaces old bar) */}
-      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20">
+      {/* Minimal Scroll Cue Button (Hidden on Mobile view, visible on Desktop md/lg) */}
+      <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 z-20 hidden md:block">
         <motion.button
           onClick={handleScrollDown}
-          animate={{ y: [0, 6, 0] }}
+          animate={{ y: [0, 5, 0] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-          className="flex flex-col items-center gap-1.5 text-white/40 hover:text-accent transition-colors group cursor-pointer p-2"
+          className="flex flex-col items-center gap-1 text-white/40 hover:text-accent transition-colors group cursor-pointer p-1"
           aria-label="Scroll Down"
         >
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium group-hover:text-accent transition-colors">
+          <span className="text-[9px] uppercase tracking-[0.2em] font-medium group-hover:text-accent transition-colors">
             Scroll
           </span>
-          <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+          <ChevronDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
         </motion.button>
       </div>
     </section>

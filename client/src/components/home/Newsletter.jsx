@@ -18,7 +18,7 @@ const Newsletter = () => {
   };
 
   return (
-    <section className="py-24 lg:py-32 bg-white relative overflow-hidden">
+    <section className="py-8 lg:py-12 bg-white relative overflow-hidden">
       <Container>
         <div className="max-w-4xl mx-auto bg-[#f8f8f8] rounded-[3rem] p-12 sm:p-16 lg:p-24 relative overflow-hidden border border-black/5">
           {/* Decorative gradients */}

@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import ProductGrid from '@/components/product/ProductGrid';
 import ProductFilters from '@/components/product/ProductFilters';
@@ -9,7 +9,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import ErrorState from '@/components/ui/ErrorState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import { useProducts } from '@/hooks/useProducts';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,6 +21,8 @@ const Shop = () => {
     category: searchParams.get('category') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
+    rating: searchParams.get('rating') || '',
+    availability: searchParams.get('availability') || '',
     sort: searchParams.get('sort') || 'latest',
   };
 
@@ -29,7 +31,16 @@ const Shop = () => {
   const updateFilters = (newFilters) => {
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([key, val]) => {
-      if (val && val !== '' && key !== 'limit') params.set(key, val);
+      if (
+        val !== undefined &&
+        val !== null &&
+        val !== '' &&
+        key !== 'limit' &&
+        !(key === 'sort' && val === 'latest') &&
+        !(key === 'page' && Number(val) === 1)
+      ) {
+        params.set(key, val);
+      }
     });
     setSearchParams(params);
   };
@@ -43,6 +54,44 @@ const Shop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleClearAll = () => {
+    updateFilters({
+      category: '',
+      minPrice: '',
+      maxPrice: '',
+      rating: '',
+      availability: '',
+      sort: 'latest',
+      search: '',
+      page: 1,
+      limit: 12,
+    });
+  };
+
+  // Build active filter chips
+  const activeChips = [];
+  if (filters.category) activeChips.push({ key: 'category', label: filters.category });
+  if (filters.search) activeChips.push({ key: 'search', label: `"${filters.search}"` });
+  if (filters.rating) activeChips.push({ key: 'rating', label: `${filters.rating}★+` });
+  if (filters.availability) activeChips.push({ key: 'availability', label: 'In Stock' });
+  if (filters.minPrice || filters.maxPrice) {
+    activeChips.push({
+      key: 'price',
+      label: `₹${filters.minPrice || '0'} – ₹${filters.maxPrice || '∞'}`,
+    });
+  }
+
+  const removeChip = (chipKey) => {
+    const updated = { ...filters, page: 1 };
+    if (chipKey === 'price') {
+      updated.minPrice = '';
+      updated.maxPrice = '';
+    } else {
+      updated[chipKey] = '';
+    }
+    updateFilters(updated);
+  };
+
   return (
     <>
       <Helmet>
@@ -52,33 +101,70 @@ const Shop = () => {
 
       <div className="bg-surface min-h-screen">
         {/* Header */}
-        <div className="bg-white border-b border-border/60 shadow-[0_10px_30px_rgba(0,0,0,0.02)] relative overflow-hidden">
-          {/* Subtle background glow */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-          
-          <Container className="py-12 relative z-10">
+        <div className="page-header">
+          <div className="page-header-glow" />
+
+          <Container className="page-header-content">
             <Breadcrumb items={[{ label: 'Shop' }]} />
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-primary mt-6 tracking-tight">
+              <h1 className="page-header-title">
                 {filters.search
                   ? `Results for "${filters.search}"`
                   : filters.category || 'All Products'}
               </h1>
               {data && (
-                <p className="text-muted mt-3 text-lg font-light">
+                <motion.p
+                  key={data.totalProducts}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="page-header-subtitle"
+                >
                   Showing <span className="font-medium text-primary">{data.products?.length || 0}</span> of{' '}
                   <span className="font-medium text-primary">{data.totalProducts}</span> products
-                </p>
+                </motion.p>
               )}
             </motion.div>
           </Container>
         </div>
 
         <Container className="py-12">
+          {/* Active filter chips */}
+          <AnimatePresence>
+            {activeChips.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex flex-wrap items-center gap-2 mb-8 overflow-hidden"
+              >
+                <span className="text-xs font-medium text-muted mr-1">Active filters:</span>
+                {activeChips.map((chip) => (
+                  <motion.button
+                    key={chip.key}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    onClick={() => removeChip(chip.key)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 text-accent-dark text-xs font-medium border border-accent/20 hover:bg-accent/15 transition-colors"
+                  >
+                    {chip.label}
+                    <X className="w-3 h-3" />
+                  </motion.button>
+                ))}
+                <button
+                  onClick={handleClearAll}
+                  className="text-xs text-muted hover:text-primary transition-colors underline underline-offset-2"
+                >
+                  Clear all
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="flex flex-col lg:flex-row gap-10">
             {/* Sidebar Filters */}
             <aside className="lg:w-72 shrink-0">
@@ -100,7 +186,7 @@ const Shop = () => {
                   icon={Search}
                   title="No products found"
                   description="Try adjusting your filters or search term to find what you're looking for."
-                  action={() => updateFilters({ page: 1, limit: 12 })}
+                  action={handleClearAll}
                   actionLabel="Clear Filters"
                 />
               ) : (

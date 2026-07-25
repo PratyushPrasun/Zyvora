@@ -2,6 +2,8 @@ import api from '@/lib/axios';
 
 export const getProducts = (params) => api.get('/products', { params });
 
+export const getCategories = () => api.get('/products/categories');
+
 export const getProductById = (id) => api.get(`/products/${id}`);
 
 export const addProduct = (formData) =>
