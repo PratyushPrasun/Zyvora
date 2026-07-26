@@ -40,7 +40,7 @@ export const addToCart = asyncHandler(async (req, res) => {
             items: [
                 {
                     product: productId,
-                    quantity: quantity || 1
+                    quantity: Number(quantity) || 1
                 }
             ]
         });
@@ -60,13 +60,13 @@ export const addToCart = asyncHandler(async (req, res) => {
 
     if (itemIndex > -1) {
 
-        cart.items[itemIndex].quantity += quantity || 1;
+        cart.items[itemIndex].quantity += Number(quantity) || 1;
 
     } else {
 
         cart.items.push({
             product: productId,
-            quantity: quantity || 1
+            quantity: Number(quantity) || 1
         });
 
     }
