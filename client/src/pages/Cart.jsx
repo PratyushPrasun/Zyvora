@@ -13,7 +13,7 @@ import { useCart } from '@/hooks/useCart';
 
 const Cart = () => {
   const { data: cart, isLoading } = useCart();
-  const items = cart?.items || [];
+  const items = (cart?.items || []).filter((item) => item?.product);
 
   return (
     <>

@@ -29,7 +29,7 @@ const Checkout = () => {
   const [processing, setProcessing] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
 
-  const items = cart?.items || [];
+  const items = (cart?.items || []).filter((item) => item?.product);
   const addresses = addressData?.addresses || [];
 
   // Auto-select default address

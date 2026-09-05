@@ -47,7 +47,7 @@ export const useUpdateCartItem = () => {
         return {
           ...cart,
           items: cart.items?.map((item) =>
-            (item.product?._id || item.product) === productId
+            productId && item?.product && (item.product?._id || item.product) === productId
               ? { ...item, quantity }
               : item
           ),

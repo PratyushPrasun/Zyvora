@@ -1,4 +1,5 @@
 import Product from "../models/product.js";
+import Cart from "../models/cart.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadImage, deleteImage } from "../utils/cloudinaryHelper.js";
 import { deleteCache, deleteCacheByPattern, getCache, setCache } from "../services/cacheServices.js";
@@ -416,6 +417,16 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     }
 
     await product.deleteOne();
+
+    // Clean up deleted product from all user carts
+    try {
+        await Cart.updateMany(
+            { "items.product": product._id },
+            { $pull: { items: { product: product._id } } }
+        );
+    } catch (cartErr) {
+        console.error("Failed to clean up product from carts:", cartErr);
+    }
 
     await deleteCacheByPattern("products:*");
 

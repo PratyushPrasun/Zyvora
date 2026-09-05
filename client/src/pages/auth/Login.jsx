@@ -42,7 +42,7 @@ const Login = () => {
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary items-center justify-center">
           <div className="absolute inset-0">
             <img 
-              src="https://images.unsplash.com/photo-1618090584126-129cd1f3f5ce?q=80&w=1200&auto=format&fit=crop" 
+              src="https://images.unsplash.com/photo-1552046122-03184de85e08?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
               alt="Premium lifestyle" 
               className="w-full h-full object-cover opacity-60"
             />
