@@ -1,7 +1,7 @@
 import { useSearchParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { CheckCircle, XCircle, Package, Download, ShieldCheck, ArrowRight, RefreshCcw } from 'lucide-react';
+import { CheckCircle, XCircle, Package, Download, ShieldCheck, ArrowRight, RefreshCcw, Truck } from 'lucide-react';
 import { useEffect } from 'react';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';

@@ -103,6 +103,13 @@ export const getCart = asyncHandler(async (req, res) => {
         });
     }
 
+    // Purge items where product was deleted from DB (item.product === null)
+    const validItems = cart.items.filter(item => item.product !== null && item.product !== undefined);
+    if (validItems.length !== cart.items.length) {
+        cart.items = validItems;
+        await cart.save();
+    }
+
     res.status(200).json({
         success: true,
         cart
@@ -117,6 +124,13 @@ export const getCart = asyncHandler(async (req, res) => {
 export const updateCartItem = asyncHandler(async (req, res) => {
   const { quantity } = req.body;
   const { productId } = req.params;
+
+  if (!productId || productId === 'null' || productId === 'undefined') {
+    return res.status(400).json({
+      success: false,
+      message: "Valid product ID is required.",
+    });
+  }
 
   // Validate quantity
   if (!quantity || quantity < 1) {
@@ -140,7 +154,7 @@ export const updateCartItem = asyncHandler(async (req, res) => {
 
   // Find product inside cart
   const cartItem = cart.items.find(
-    (item) => item.product.toString() === productId
+    (item) => item.product && item.product.toString() === productId
   );
 
   if (!cartItem) {
@@ -150,7 +164,7 @@ export const updateCartItem = asyncHandler(async (req, res) => {
     });
   }
 
-  // ✅ 4. Check product stock (ADD THIS HERE)
+  // ✅ Check product stock
   const product = await Product.findById(productId);
 
   if (!product) {
@@ -178,6 +192,11 @@ export const updateCartItem = asyncHandler(async (req, res) => {
     select: "title price images stock category brand",
   });
 
+  // Filter out any null items
+  if (updatedCart) {
+    updatedCart.items = updatedCart.items.filter(item => item.product !== null);
+  }
+
   res.status(200).json({
     success: true,
     message: "Cart updated successfully.",
@@ -193,6 +212,13 @@ export const removeCartItem = asyncHandler(async (req, res) => {
 
     const { productId } = req.params;
 
+    if (!productId || productId === 'null' || productId === 'undefined') {
+        return res.status(400).json({
+            success: false,
+            message: "Valid product ID is required."
+        });
+    }
+
     const cart = await Cart.findOne({
         user: req.user._id
     });
@@ -205,7 +231,7 @@ export const removeCartItem = asyncHandler(async (req, res) => {
     }
 
     const productExists = cart.items.some(
-        item => item.product.toString() === productId
+        item => item.product && item.product.toString() === productId
     );
 
     if (!productExists) {
@@ -216,7 +242,7 @@ export const removeCartItem = asyncHandler(async (req, res) => {
     }
 
     cart.items = cart.items.filter(
-        item => item.product.toString() !== productId
+        item => item.product && item.product.toString() !== productId
     );
 
     await cart.save();
@@ -225,6 +251,10 @@ export const removeCartItem = asyncHandler(async (req, res) => {
         path: "items.product",
         select: "title price images stock category brand"
     });
+
+    if (updatedCart) {
+        updatedCart.items = updatedCart.items.filter(item => item.product !== null);
+    }
 
     res.status(200).json({
         success: true,

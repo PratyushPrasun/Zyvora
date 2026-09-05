@@ -8,8 +8,12 @@ const CartItem = ({ item, compact = false }) => {
   const updateCart = useUpdateCartItem();
   const removeFromCart = useRemoveFromCart();
 
-  const product = item.product;
-  const productId = product?._id || product;
+  const product = item?.product;
+  const productId = typeof product === 'object' ? product?._id : product;
+
+  if (!item || !product || !productId) {
+    return null;
+  }
 
   const image =
     product?.images?.find((img) => img.isPrimary)?.url ||
@@ -51,11 +55,12 @@ const CartItem = ({ item, compact = false }) => {
           <div className="flex items-center gap-0.5">
             <motion.button
               whileTap={{ scale: 0.85 }}
-              onClick={() =>
+              onClick={() => {
+                if (!productId) return;
                 item.quantity > 1
                   ? updateCart.mutate({ productId, quantity: item.quantity - 1 })
-                  : removeFromCart.mutate(productId)
-              }
+                  : removeFromCart.mutate(productId);
+              }}
               className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent/30 hover:text-accent transition-all duration-200"
               aria-label="Decrease quantity"
             >
@@ -66,9 +71,10 @@ const CartItem = ({ item, compact = false }) => {
             </span>
             <motion.button
               whileTap={{ scale: 0.85 }}
-              onClick={() =>
-                updateCart.mutate({ productId, quantity: item.quantity + 1 })
-              }
+              onClick={() => {
+                if (!productId) return;
+                updateCart.mutate({ productId, quantity: item.quantity + 1 });
+              }}
               className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-accent/5 hover:border-accent/30 hover:text-accent transition-all duration-200"
               aria-label="Increase quantity"
             >
@@ -79,7 +85,10 @@ const CartItem = ({ item, compact = false }) => {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => removeFromCart.mutate(productId)}
+            onClick={() => {
+              if (!productId) return;
+              removeFromCart.mutate(productId);
+            }}
             className="p-2 text-muted hover:text-error transition-all duration-200 rounded-xl hover:bg-error/5"
             aria-label="Remove from cart"
           >

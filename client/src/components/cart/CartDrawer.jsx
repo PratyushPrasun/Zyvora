@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 const CartDrawer = ({ isOpen, onClose }) => {
   const { data: cart } = useCart();
   const navigate = useNavigate();
-  const items = cart?.items || [];
+  const items = (cart?.items || []).filter((item) => item?.product);
 
   const handleCheckout = () => {
     onClose();

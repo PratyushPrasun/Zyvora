@@ -12,6 +12,7 @@ export const apiLimiter = (req, res, next) => {
             redisLimiter = rateLimit({
                 windowMs: 15 * 60 * 1000,
                 max: 200,
+                validate: false,
                 standardHeaders: true,
                 legacyHeaders: false,
                 store: new RedisStore({
@@ -31,6 +32,7 @@ export const apiLimiter = (req, res, next) => {
             memoryLimiter = rateLimit({
                 windowMs: 15 * 60 * 1000,
                 max: 200,
+                validate: false,
                 standardHeaders: true,
                 legacyHeaders: false,
                 message: {
